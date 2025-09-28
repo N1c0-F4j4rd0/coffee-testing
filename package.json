@@ -1,0 +1,31 @@
+{
+  "name": "coffee-cart-automation",
+  "version": "1.0.0",
+  "description": "Automatización del carrito de compras de café",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node src/tests/full-test.js",
+    "smoke-test": "node src/tests/smoke-test.js",
+    "simple-test": "node scripts/test-simple-selectors.js",
+    "inspect": "node scripts/inspect-page.js",
+    "diagnose": "node scripts/check-compatibility.js",
+    "fix-deps": "npm install chromedriver@latest selenium-webdriver@latest --force",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@sitespeed.io/chromedriver": "^140.0.7339-82",
+    "selenium-webdriver": "^4.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  },
+  "keywords": [
+    "selenium",
+    "automation",
+    "testing",
+    "coffee"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT"
+}
