@@ -4,27 +4,38 @@
   "description": "Automatización del carrito de compras de café",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "test": "node src/tests/full-test.js",
-    "smoke-test": "node src/tests/smoke-test.js",
-    "simple-test": "node scripts/test-simple-selectors.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:full": "jest --testNamePattern='Full Test'",
+    "test:smoke": "jest --testNamePattern='Smoke Test'",
+    "test:simple": "jest --testNamePattern='Simple Test'",
+    "start": "jest --testNamePattern='Full Test'",
     "inspect": "node scripts/inspect-page.js",
     "diagnose": "node scripts/check-compatibility.js",
-    "fix-deps": "npm install chromedriver@latest selenium-webdriver@latest --force",
-    "dev": "nodemon src/index.js"
+    "fix-deps": "npm install chromedriver@latest selenium-webdriver@latest --force"
   },
   "dependencies": {
     "@sitespeed.io/chromedriver": "^140.0.7339-82",
     "selenium-webdriver": "^4.16.0"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^2.0.20"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "setupFilesAfterEnv": ["<rootDir>/src/config/jest.setup.js"],
+    "testMatch": [
+      "**/src/tests/**/*.test.js"
+    ]
   },
   "keywords": [
     "selenium",
     "automation",
     "testing",
-    "coffee"
+    "coffee",
+    "jest"
   ],
   "author": "Tu Nombre",
   "license": "MIT"

@@ -8,13 +8,13 @@ class HomePage extends BasePage {
         this.url = 'https://coffee-cart.app/';
     }
 
-    // SELECTORES ESPECÍFICOS PARA COFFEE-CART.APP
+    // SELECTORES ESPECÍFICOS PARA COFFEE-CART.APP (ACTUALIZADOS)
     get productCards() { 
-        return By.css('h4'); // Los productos están en elementos H4
+        return By.css('div.cup-body'); // Los productos están en div.cup-body
     }
     
     get productName() { 
-        return By.css('strong'); // Los nombres están en strong dentro del H4
+        return By.css('h4'); // Los nombres están en H4 dentro del producto
     }
     
     get productPrice() { 
@@ -52,7 +52,7 @@ class HomePage extends BasePage {
         
         // Esperar a que cargue la página
         await this.waitForElement(this.productCards, 20000);
-        await this.sleep(2000);
+        await this.sleep(3000); // Esperar más tiempo para que cargue completamente
         Logger.success('✅ Página cargada correctamente');
     }
 
@@ -60,23 +60,32 @@ class HomePage extends BasePage {
         Logger.info('🔍 Buscando productos en la página...');
         
         try {
-            // Los productos están en elementos H4 que contienen nombres de café
+            // Los productos están en elementos div.cup-body
             const productElements = await this.findElements(this.productCards);
             
             if (productElements.length === 0) {
-                Logger.error('❌ No se encontraron elementos H4 (productos)');
+                Logger.error('❌ No se encontraron elementos div.cup-body (productos)');
+                
+                // Intentar selector alternativo
+                Logger.info('🔄 Intentando selector alternativo h4...');
+                const h4Elements = await this.findElements(By.css('h4'));
+                if (h4Elements.length > 0) {
+                    Logger.success(`✅ Encontrados ${h4Elements.length} elementos H4 como alternativa`);
+                    return h4Elements;
+                }
+                
                 return [];
             }
 
-            Logger.success(`✅ Encontrados ${productElements.length} elementos H4 (potenciales productos)`);
+            Logger.success(`✅ Encontrados ${productElements.length} elementos div.cup-body (productos)`);
             
-            // Filtrar solo los H4 que tienen precios (son los productos reales)
+            // Filtrar solo los productos válidos que tienen contenido
             const validProducts = [];
             for (let element of productElements) {
                 try {
                     const text = await element.getText();
-                    // Los productos reales tienen nombres de café y precios
-                    if (text && text.length > 0 && text.includes('$')) {
+                    // Los productos reales tienen contenido
+                    if (text && text.length > 0) {
                         validProducts.push(element);
                     }
                 } catch (e) {
@@ -126,9 +135,16 @@ class HomePage extends BasePage {
             const productInfo = await this.getProductInfo(productElement);
             Logger.info(`🛒 Intentando agregar: ${productInfo.name}`);
             
-            // Estrategia mejorada: hacer clic directamente en el elemento H4
-            // En esta página, hacer clic en el nombre del producto lo agrega al carrito
-            await productElement.click();
+            // Estrategia: hacer clic directamente en el elemento del producto
+            await this.driver.executeScript('arguments[0].scrollIntoView({behavior: "smooth", block: "center"});', productElement);
+            await this.sleep(500);
+            
+            // Resaltar el elemento antes de hacer clic
+            await this.driver.executeScript('arguments[0].style.background = "yellow";', productElement);
+            await this.sleep(300);
+            
+            // Hacer clic en el elemento
+            await this.driver.executeScript('arguments[0].click();', productElement);
             Logger.success(`✅ Clic realizado en: ${productInfo.name}`);
             
             // Esperar a que se actualice el carrito
@@ -141,24 +157,6 @@ class HomePage extends BasePage {
             
         } catch (error) {
             Logger.error(`💥 Error agregando producto: ${error.message}`);
-            
-            // Intentar alternativa: buscar botón específico
-            try {
-                Logger.info('🔄 Intentando método alternativo...');
-                const parentElement = await productElement.findElement(By.xpath('..'));
-                const buttons = await parentElement.findElements(By.css('button'));
-                
-                if (buttons.length > 0) {
-                    await buttons[0].click();
-                    Logger.success('✅ Producto agregado (método alternativo)');
-                    await this.sleep(1000);
-                    await this.closeModalIfPresent();
-                    return productInfo;
-                }
-            } catch (altError) {
-                Logger.error('❌ Método alternativo también falló');
-            }
-            
             return null;
         }
     }
